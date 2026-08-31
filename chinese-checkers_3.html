@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Sternhalma · Chinese Checkers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#1a120b;
+  --bg-mid:#2c1c11;
+  --felt:#123326;
+  --felt-2:#0d2a1e;
+  --brass:#c9a24b;
+  --brass-bright:#eccd82;
+  --brass-dim:#8a6f34;
+  --ivory:#f3ead9;
+  --muted:#b9a98d;
+  --hole:#0a1f17;
+  --hole-rim:#2a4a3c;
+  --panel:#241609;
+  --danger:#c1272d;
+  --p0:#c1272d; --p1:#2b6bc4; --p2:#1f9d63; --p3:#e0a72a; --p4:#9a5cc9; --p5:#f2ede1;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse at 50% -10%, #3a2515 0%, transparent 60%),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.08) 0 2px, transparent 2px 6px),
+    linear-gradient(160deg, var(--bg-mid), var(--bg-deep) 70%);
+  color:var(--ivory);
+  font-family:'Inter', sans-serif;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:24px 14px 60px;
+}
+.wrap{width:100%;max-width:920px;}
+h1,h2,h3{font-family:'Fraunces', serif;font-weight:700;margin:0;}
+.eyebrow{
+  font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--brass); font-weight:600; opacity:.85;
+}
+.card{
+  background:linear-gradient(180deg, #2a1a0d, #201308);
+  border:1px solid #4a3418;
+  border-radius:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+  padding:28px 26px;
+}
+.header{
+  text-align:center;
+  margin-bottom:22px;
+}
+.header .star{
+  width:34px;height:34px;margin:0 auto 8px;
+  filter:drop-shadow(0 0 6px rgba(233,205,130,.5));
+}
+.header h1{font-size:34px;color:var(--ivory);letter-spacing:.01em;}
+.header .sub{color:var(--muted);font-size:14px;margin-top:4px;}
+hr.rule{border:none;border-top:1px solid #4a3418;margin:18px 0;}
+
+button{font-family:'Inter',sans-serif;cursor:pointer;}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(180deg, #3a280f, #241605);
+  border:1px solid var(--brass-dim);
+  color:var(--ivory);
+  padding:13px 20px;
+  border-radius:10px;
+  font-size:15px;font-weight:600;
+  transition:.15s ease;
+  width:100%;
+}
+.btn:hover{border-color:var(--brass-bright); background:linear-gradient(180deg,#493213,#2b1a08); transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn.primary{
+  background:linear-gradient(180deg, var(--brass-bright), var(--brass));
+  color:#231404; border-color:var(--brass-bright);
+}
+.btn.primary:hover{filter:brightness(1.08);}
+.btn.ghost{background:transparent;border:1px solid #4a3418;color:var(--muted);}
+.btn.small{padding:8px 14px;font-size:13px;width:auto;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+.menu-grid{display:grid;gap:12px;}
+.opt-row{display:flex;gap:10px;flex-wrap:wrap;}
+.opt-row .btn{flex:1;min-width:110px;}
+.opt-row .btn.active{background:linear-gradient(180deg, var(--brass-bright), var(--brass));color:#231404;border-color:var(--brass-bright);}
+
+label.field-label{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;font-weight:600;}
+
+.seat-row{
+  display:flex;align-items:center;gap:12px;
+  background:rgba(0,0,0,0.18);
+  border:1px solid #3a2611;
+  border-radius:10px;
+  padding:10px 12px;
+  margin-bottom:8px;
+}
+.swatch{width:20px;height:20px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 3px rgba(0,0,0,.4), 0 0 0 2px rgba(255,255,255,.08);}
+.seat-name{flex:1;font-weight:600;font-size:14px;}
+.seat-sub{font-size:12px;color:var(--muted);}
+select{
+  background:#1c1207;color:var(--ivory);border:1px solid var(--brass-dim);
+  border-radius:6px;padding:6px 8px;font-size:13px;font-family:inherit;
+}
+input[type=text]{
+  background:#140d05;color:var(--ivory);border:1px solid var(--brass-dim);
+  border-radius:8px;padding:11px 12px;font-size:16px;letter-spacing:.12em;
+  width:100%;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:600;
+}
+input[type=text]:focus{outline:none;border-color:var(--brass-bright);}
+
+.code-display{
+  text-align:center;font-family:'Fraunces',serif;font-size:40px;letter-spacing:.14em;
+  color:var(--brass-bright); background:rgba(0,0,0,.25); border:1px dashed var(--brass-dim);
+  border-radius:12px; padding:16px; margin:14px 0;
+}
+.helpnote{font-size:12.5px;color:var(--muted);line-height:1.5;background:rgba(0,0,0,.2);border-radius:8px;padding:10px 12px;border:1px solid #3a2611;}
+
+.gamewrap{display:flex;flex-direction:column;gap:14px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.turn-pill{
+  display:flex;align-items:center;gap:9px;background:rgba(0,0,0,.25);
+  border:1px solid #3a2611;border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;
+}
+.turn-pill .swatch{width:14px;height:14px;}
+.boardbox{
+  position:relative;
+  background:radial-gradient(ellipse at 50% 40%, var(--felt), var(--felt-2) 80%);
+  border-radius:16px;
+  border:3px solid var(--brass);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.55), 0 12px 30px rgba(0,0,0,.45);
+  padding:6px;
+}
+.boardbox svg{width:100%;height:auto;display:block;}
+.hole{fill:var(--hole);stroke:var(--hole-rim);stroke-width:0.09;}
+.hole.legal{stroke:var(--brass-bright);stroke-width:0.16;filter:drop-shadow(0 0 3px rgba(236,205,130,.8));cursor:pointer;}
+.peg{cursor:pointer;stroke:rgba(0,0,0,.35);stroke-width:0.07;}
+.peg.mine{cursor:pointer;}
+.peg.selected{stroke:var(--brass-bright);stroke-width:0.18;filter:drop-shadow(0 0 4px rgba(236,205,130,.9));}
+.peg.notmine{cursor:default;}
+.sidepanel{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+.seatlist{display:flex;gap:8px;flex-wrap:wrap;}
+.seat-chip{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.2);border:1px solid #3a2611;border-radius:999px;padding:5px 10px 5px 6px;font-size:12.5px;}
+.seat-chip.turn{border-color:var(--brass-bright);box-shadow:0 0 0 1px var(--brass-bright);}
+.seat-chip .swatch{width:12px;height:12px;}
+.controls{display:flex;gap:8px;flex-wrap:wrap;}
+
+.overlay{
+  position:fixed;inset:0;background:rgba(10,6,2,.72);
+  display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.win-card{
+  background:linear-gradient(180deg,#2a1a0d,#201308);border:1px solid var(--brass);
+  border-radius:18px;padding:36px 30px;text-align:center;max-width:380px;
+  box-shadow:0 25px 60px rgba(0,0,0,.6);
+}
+.win-card .swatch{width:34px;height:34px;margin:0 auto 14px;}
+.win-card h2{font-size:26px;margin-bottom:6px;}
+.win-card p{color:var(--muted);font-size:14px;margin:0 0 20px;}
+
+.status-msg{text-align:center;color:var(--muted);font-size:13.5px;min-height:18px;}
+
+@media (max-width:560px){
+  .card{padding:20px 16px;}
+  .header h1{font-size:26px;}
+  .code-display{font-size:30px;}
+}
+::selection{background:var(--brass-bright);color:#231404;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <svg class="star" viewBox="0 0 100 100"><polygon points="50,3 61,35 95,35 67,55 78,90 50,68 22,90 33,55 5,35 39,35" fill="none" stroke="#eccd82" stroke-width="4" stroke-linejoin="round"/></svg>
+    <h1>Sternhalma</h1>
+    <div class="sub">Chinese Checkers — bots, and rooms for friends</div>
+  </div>
+  <div id="root"></div>
+</div>
+
+<script>
+/* ======================= BOARD GEOMETRY ======================= */
+const DIRS = [[1,-1,0],[1,0,-1],[0,1,-1],[-1,1,0],[-1,0,1],[0,-1,1]];
+function add(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]];}
+function key(p){return p[0]+','+p[1]+','+p[2];}
+function fromKey(k){return k.split(',').map(Number);}
+function rot(p){return [-p[1],-p[2],-p[0]];}
+function rotN(p,n){n=((n%6)+6)%6;let c=p;for(let i=0;i<n;i++)c=rot(c);return c;}
+
+function genBoard(){
+  const cells=[];
+  for(let x=-4;x<=4;x++)for(let y=-4;y<=4;y++){
+    const z=-x-y; if(z>=-4&&z<=4) cells.push([x,y,z]);
+  }
+  const baseArm=[];
+  for(let x=5;x<=8;x++)for(let y=-4;y<=-(x-4);y++){
+    const z=-x-y; baseArm.push([x,y,z]);
+  }
+  const arms=[]; let cur=baseArm;
+  for(let k=0;k<6;k++){ arms.push(cur); cells.push(...cur); cur=cur.map(rot); }
+  return {cells, arms};
+}
+const BOARD = genBoard();
+const BOARD_SET = new Set(BOARD.cells.map(key));
+const ARM_SETS = {2:[0,3], 3:[0,2,4], 4:[0,1,3,4], 6:[0,1,2,3,4,5]};
+const COLORS = ['#c1272d','#2b6bc4','#1f9d63','#e0a72a','#9a5cc9','#f2ede1'];
+const COLOR_NAMES = ['Crimson','Cobalt','Emerald','Amber','Amethyst','Pearl'];
+
+function forward(cell, homeArm){ return -rotN(cell,(6-homeArm)%6)[0]; }
+function project(cell){
+  return [1.5*cell[0], Math.sqrt(3)/2*(cell[1]-cell[2])];
+}
+function rotatePt([x,y], deg){
+  const t = deg*Math.PI/180;
+  return [x*Math.cos(t)-y*Math.sin(t), x*Math.sin(t)+y*Math.cos(t)];
+}
+
+/* ======================= MOVE LOGIC ======================= */
+// board: Map(key -> seatIndex), occupied cells only
+function stepTargets(board, cell){
+  const out=[];
+  for(const d of DIRS){
+    const to=add(cell,d), tk=key(to);
+    if(BOARD_SET.has(tk) && !board.has(tk)) out.push(to);
+  }
+  return out;
+}
+function oneHopJumpTargets(board, cell){
+  const out=[];
+  for(const d of DIRS){
+    const mid=add(cell,d), land=add(mid,d);
+    const mk=key(mid), lk=key(land);
+    if(!BOARD_SET.has(mk)||!BOARD_SET.has(lk)) continue;
+    if(!board.has(mk)) continue;
+    if(board.has(lk)) continue;
+    out.push(land);
+  }
+  return out;
+}
+// full enumeration incl multi-hop chains, with reconstructible paths - used by bot
+function allMovesForPeg(board, peg){
+  const moves=[];
+  for(const to of stepTargets(board, peg)) moves.push({from:peg, to, type:'step', path:[to]});
+  const parent=new Map(); parent.set(key(peg), null);
+  const order=[peg]; let qi=0;
+  while(qi<order.length){
+    const cur=order[qi++];
+    for(const d of DIRS){
+      const mid=add(cur,d), land=add(mid,d);
+      const mk=key(mid), lk=key(land);
+      if(parent.has(lk)) continue;
+      if(!BOARD_SET.has(mk)||!BOARD_SET.has(lk)) continue;
+      if(!board.has(mk)) continue;
+      if(board.has(lk)) continue;
+      parent.set(lk, key(cur));
+      order.push(land);
+    }
+  }
+  for(let i=1;i<order.length;i++){
+    const land=order[i];
+    const path=[]; let ck=key(land);
+    while(ck!==key(peg)){ path.unshift(fromKey(ck)); ck=parent.get(ck); }
+    moves.push({from:peg, to:land, type:'jump', path});
+  }
+  return moves;
+}
+function allMovesForSeat(board, pegs){
+  const moves=[];
+  for(const p of pegs) moves.push(...allMovesForPeg(board, p));
+  return moves;
+}
+function seatPegs(board, seatIdx){
+  const pegs=[];
+  for(const [k,s] of board) if(s===seatIdx) pegs.push(fromKey(k));
+  return pegs;
+}
+function hasWon(board, seatIdx, goalSet){
+  const pegs = seatPegs(board, seatIdx);
+  if(pegs.length===0) return false;
+  return pegs.every(p=>goalSet.has(key(p)));
+}
+
+/* ======================= APP STATE ======================= */
+let G = null;      // active game state
+let UI = {screen:'menu'};
+let pollTimer = null;
+let processingBot = false;
+const root = document.getElementById('root');
+
+function newBoardFromSeats(numPlayers, armList){
+  const board = new Map();
+  for(let s=0;s<numPlayers;s++){
+    const arm = BOARD.arms[armList[s]];
+    for(const c of arm) board.set(key(c), s);
+  }
+  return board;
+}
+
+function makeSeats(numPlayers, myIndex, config){
+  // config: array of {type:'human'|'bot'|'empty', difficulty, name}
+  const armList = ARM_SETS[numPlayers];
+  return armList.map((arm,i)=>({
+    seat:i, arm, color:COLORS[arm], colorName:COLOR_NAMES[arm],
+    type: config[i].type, difficulty: config[i].difficulty||'medium',
+    name: config[i].name || (config[i].type==='bot' ? COLOR_NAMES[arm]+' Bot' : COLOR_NAMES[arm]),
+    connected: config[i].type!=='empty'
+  }));
+}
+
+function computeProjection(mySeatArm){
+  const rotDeg = 90 - mySeatArm*60;
+  const proj = new Map();
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(const c of BOARD.cells){
+    const [x,y] = rotatePt(project(c), rotDeg);
+    proj.set(key(c), [x,y]);
+    minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+  }
+  const pad = 2.4;
+  return {proj, viewBox:[minX-pad, minY-pad, (maxX-minX)+2*pad, (maxY-minY)+2*pad]};
+}
+
+function startGame({mode, numPlayers, seatsConfig, mySeat, roomCode, isHost}){
+  const armList = ARM_SETS[numPlayers];
+  const seats = makeSeats(numPlayers, mySeat, seatsConfig);
+  const board = newBoardFromSeats(numPlayers, armList);
+  const {proj, viewBox} = computeProjection(seats[mySeat].arm);
+  G = {
+    mode, numPlayers, seats, armList, board, turn:0,
+    selected:null, chainActive:false,
+    winner:null, mySeat, roomCode, isHost,
+    proj, viewBox, moveSeq:0, statusMsg:''
+  };
+  UI.screen='game';
+  render();
+  if(mode==='online'){
+    startPolling();
+  }
+  maybeTriggerBot();
+}
+
+function seatGoalSet(seat){
+  const goalArm = (seat.arm+3)%6;
+  return new Set(BOARD.arms[goalArm].map(key));
+}
+
+/* ======================= RENDERING ======================= */
+function render(){
+  if(UI.screen==='menu') return renderMenu();
+  if(UI.screen==='botSetup') return renderBotSetup();
+  if(UI.screen==='onlineMenu') return renderOnlineMenu();
+  if(UI.screen==='createSetup') return renderCreateSetup();
+  if(UI.screen==='waitingRoom') return renderWaitingRoom();
+  if(UI.screen==='joinRoom') return renderJoinRoom();
+  if(UI.screen==='localSetup') return renderLocalSetup();
+  if(UI.screen==='game') return renderGame();
+}
+
+function el(html){ const d=document.createElement('div'); d.innerHTML=html; return d.firstElementChild; }
+
+function renderMenu(){
+  root.innerHTML='';
+  root.appendChild(el(`
+    <div class="card">
+      <div class="menu-grid">
+        <button class="btn primary" id="btn-bot">Play vs Bots</button>
+        <button class="btn" id="btn-online">Play vs Friends Online</button>
+        <button class="btn" id="btn-local">Pass &amp; Play (same device)</button>
+      </div>
+      <hr class="rule">
+      <p class="helpnote">Choose your board — take on computer opponents at three difficulty levels, or challenge friends by sharing a room code. Online play works from any link to this page — everyone just needs to open the same URL.</p>
+    </div>
+  `));
+  document.getElementById('btn-bot').onclick=()=>{UI.screen='botSetup'; UI.numPlayers=2; UI.diffs={1:'medium',2:'medium',3:'medium',4:'medium',5:'medium'}; render();};
+  document.getElementById('btn-online').onclick=()=>{UI.screen='onlineMenu'; render();};
+  document.getElementById('btn-local').onclick=()=>{UI.screen='localSetup'; UI.numPlayers=2; render();};
+}
+
+function playerCountRow(current, onPick){
+  return `<div class="opt-row" id="pc-row">
+    ${[2,3,4,6].map(n=>`<button class="btn ${n===current?'active':''}" data-n="${n}">${n} players</button>`).join('')}
+  </div>`;
+}
+function wirePlayerCountRow(getSet){
+  document.querySelectorAll('#pc-row [data-n]').forEach(b=>{
+    b.onclick=()=>{ getSet(parseInt(b.dataset.n)); render(); };
+  });
+}
+
+function diffSelectHtml(seatIdx, val){
+  return `<select data-seat="${seatIdx}" class="diff-select">
+    <option value="easy" ${val==='easy'?'selected':''}>Easy</option>
+    <option value="medium" ${val==='medium'?'selected':''}>Medium</option>
+    <option value="hard" ${val==='hard'?'selected':''}>Hard</option>
+  </select>`;
+}
+
+function renderBotSetup(){
+  root.innerHTML='';
+  const n = UI.numPlayers;
+  const armList = ARM_SETS[n];
+  let seatRows='';
+  for(let i=0;i<n;i++){
+    const arm = armList[i];
+    if(i===0){
+      seatRows += `<div class="seat-row"><div class="swatch" style="background:${COLORS[arm]}"></div>
+        <div class="seat-name">You</div><div class="seat-sub">${COLOR_NAMES[arm]}</div></div>`;
+    } else {
+      seatRows += `<div class="seat-row"><div class="swatch" style="background:${COLORS[arm]}"></div>
+        <div class="seat-name">${COLOR_NAMES[arm]} Bot</div>
+        ${diffSelectHtml(i, UI.diffs[i]||'medium')}</div>`;
+    }
+  }
+  root.appendChild(el(`
+    <div class="card">
+      <h3 style="margin-bottom:10px;">Play vs Bots</h3>
+      <label class="field-label">Number of players</label>
+      ${playerCountRow(n, null)}
+      <label class="field-label">Opponents</label>
+      <div id="seat-list">${seatRows}</div>
+      <div class="opt-row" style="margin-top:16px;">
+        <button class="btn ghost" id="back">Back</button>
+        <button class="btn primary" id="start">Start Game</button>
+      </div>
+    </div>
+  `));
+  wirePlayerCountRow((v)=>{UI.numPlayers=v;});
+  document.querySelectorAll('.diff-select').forEach(s=>{
+    s.onchange=()=>{ UI.diffs[parseInt(s.dataset.seat)] = s.value; };
+  });
+  document.getElementById('back').onclick=()=>{UI.screen='menu'; render();};
+  document.getElementById('start').onclick=()=>{
+    const n2 = UI.numPlayers;
+    const cfg=[]; for(let i=0;i<n2;i++){
+      cfg.push(i===0 ? {type:'human'} : {type:'bot', difficulty:(UI.diffs[i]||'medium')});
+    }
+    startGame({mode:'bot', numPlayers:n2, seatsConfig:cfg, mySeat:0});
+  };
+}
+
+function renderLocalSetup(){
+  root.innerHTML='';
+  const n = UI.numPlayers;
+  root.appendChild(el(`
+    <div class="card">
+      <h3 style="margin-bottom:10px;">Pass &amp; Play</h3>
+      <label class="field-label">Number of players</label>
+      ${playerCountRow(n,null)}
+      <p class="helpnote">Everyone shares this screen and takes turns — the board rotates to face whoever created it, so play close attention to the colour banner announcing each turn.</p>
+      <div class="opt-row" style="margin-top:16px;">
+        <button class="btn ghost" id="back">Back</button>
+        <button class="btn primary" id="start">Start Game</button>
+      </div>
+    </div>
+  `));
+  wirePlayerCountRow((v)=>{UI.numPlayers=v;});
+  document.getElementById('back').onclick=()=>{UI.screen='menu'; render();};
+  document.getElementById('start').onclick=()=>{
+    const n2=UI.numPlayers;
+    const cfg=[]; for(let i=0;i<n2;i++) cfg.push({type:'human', name:COLOR_NAMES[ARM_SETS[n2][i]]});
+    startGame({mode:'local', numPlayers:n2, seatsConfig:cfg, mySeat:0});
+  };
+}
+
+function renderOnlineMenu(){
+  root.innerHTML='';
+  root.appendChild(el(`
+    <div class="card">
+      <h3 style="margin-bottom:10px;">Play vs Friends Online</h3>
+      <div class="menu-grid">
+        <button class="btn primary" id="create">Create a Room</button>
+        <button class="btn" id="join">Join a Room</button>
+      </div>
+      <hr class="rule">
+      <p class="helpnote">Creating a room gives you a code (copy/paste it — it's case-sensitive). Send it to your friends however you like — they open this page, choose "Join a Room", and paste the code in. No sign-up for anyone.</p>
+      <button class="btn ghost" id="back" style="margin-top:8px;">Back</button>
+    </div>
+  `));
+  document.getElementById('create').onclick=()=>{UI.screen='createSetup'; UI.numPlayers=2; UI.seatCfg={}; render();};
+  document.getElementById('join').onclick=()=>{UI.screen='joinRoom'; UI.joinErr=''; render();};
+  document.getElementById('back').onclick=()=>{UI.screen='menu'; render();};
+}
+
+/* ======================= KVDB.IO SYNC ADAPTER =======================
+   Free, keyless (no login) public key-value storage. Unlike jsonblob.com,
+   kvdb.io ships an official browser client library (loadable via a plain
+   <script> tag), which is strong evidence its server handles cross-origin
+   requests properly — that's what fixes the CORS failure we hit with
+   jsonblob. Each room gets its OWN bucket — the bucket id IS the room
+   code, so there's no shared/central bucket to pre-provision.
+   Docs: https://kvdb.io/docs/api/                                        */
+const KVDB_BASE = 'https://kvdb.io';
+
+async function kvCreateBucket(){
+  const email = 'guest-' + Math.random().toString(36).slice(2,10) + '@sternhalma.game';
+  let res;
+  try{
+    res = await fetch(KVDB_BASE + '/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded'},
+      body: 'email=' + encodeURIComponent(email)
+    });
+  }catch(e){ throw new Error('network'); }
+  if(!res.ok) throw new Error('http'+res.status);
+  const id = (await res.text()).trim();
+  if(!id || id.length<4 || /[<>\s]/.test(id)) throw new Error('badid');
+  return id;
+}
+async function kvGet(bucket, itemKey){
+  let res;
+  try{
+    res = await fetch(`${KVDB_BASE}/${bucket}/${itemKey}`, {method:'GET', cache:'no-store'});
+  }catch(e){ throw new Error('network'); }
+  if(res.status===404) return null;
+  if(!res.ok) throw new Error('http'+res.status);
+  return await res.text();
+}
+async function kvSet(bucket, itemKey, value){
+  let res;
+  try{
+    res = await fetch(`${KVDB_BASE}/${bucket}/${itemKey}`, {method:'PUT', body:value});
+  }catch(e){ throw new Error('network'); }
+  if(!res.ok) throw new Error('http'+res.status);
+  return true;
+}
+// room helpers built on the two primitives above
+async function roomCreate(roomObj){
+  const bucket = await kvCreateBucket();
+  await kvSet(bucket, 'state', JSON.stringify(roomObj));
+  return bucket;
+}
+async function roomRead(code){
+  const txt = await kvGet(code, 'state');
+  return txt ? JSON.parse(txt) : null;
+}
+async function roomWrite(code, roomObj){
+  await kvSet(code, 'state', JSON.stringify(roomObj));
+}
+
+function myId(){
+  if(!window.__ccid) window.__ccid = 'p'+Math.random().toString(36).slice(2,10);
+  return window.__ccid;
+}
+
+function renderCreateSetup(){
+  root.innerHTML='';
+  const n=UI.numPlayers;
+  let rows='';
+  for(let i=0;i<n;i++){
+    const arm=ARM_SETS[n][i];
+    if(i===0){
+      rows += `<div class="seat-row"><div class="swatch" style="background:${COLORS[arm]}"></div>
+        <div class="seat-name">You (host)</div><div class="seat-sub">${COLOR_NAMES[arm]}</div></div>`;
+    } else {
+      const cfg = UI.seatCfg[i] || 'open';
+      rows += `<div class="seat-row"><div class="swatch" style="background:${COLORS[arm]}"></div>
+        <div class="seat-name">${COLOR_NAMES[arm]}</div>
+        <select data-seat="${i}" class="seat-mode">
+          <option value="open" ${cfg==='open'?'selected':''}>Open seat (friend joins)</option>
+          <option value="bot-easy" ${cfg==='bot-easy'?'selected':''}>Bot — Easy</option>
+          <option value="bot-medium" ${cfg==='bot-medium'?'selected':''}>Bot — Medium</option>
+          <option value="bot-hard" ${cfg==='bot-hard'?'selected':''}>Bot — Hard</option>
+        </select></div>`;
+    }
+  }
+  root.appendChild(el(`
+    <div class="card">
+      <h3 style="margin-bottom:10px;">Create a Room</h3>
+      <label class="field-label">Number of players</label>
+      ${playerCountRow(n,null)}
+      <label class="field-label">Seats</label>
+      <div id="seat-list">${rows}</div>
+      <div class="opt-row" style="margin-top:16px;">
+        <button class="btn ghost" id="back">Back</button>
+        <button class="btn primary" id="create-room">Create Room</button>
+      </div>
+    </div>
+  `));
+  wirePlayerCountRow((v)=>{UI.numPlayers=v; UI.seatCfg={};});
+  document.querySelectorAll('.seat-mode').forEach(s=>{
+    s.onchange=()=>{ UI.seatCfg[parseInt(s.dataset.seat)] = s.value; };
+  });
+  document.getElementById('back').onclick=()=>{UI.screen='onlineMenu'; render();};
+  document.getElementById('create-room').onclick=async ()=>{
+    const n2=UI.numPlayers;
+    const seats=[]; 
+    for(let i=0;i<n2;i++){
+      if(i===0){ seats.push({playerId:myId(), name:'Host', type:'human', connected:true}); continue; }
+      const cfg = UI.seatCfg[i]||'open';
+      if(cfg==='open') seats.push({playerId:null, name:null, type:'empty', connected:false});
+      else seats.push({playerId:null, name:COLOR_NAMES[ARM_SETS[n2][i]]+' Bot', type:'bot', difficulty:cfg.split('-')[1], connected:true});
+    }
+    const room = {
+      numPlayers:n2, seats, status:'waiting',
+      board:null, turn:0, winner:null, moveSeq:0, hostId:myId(), updatedAt:Date.now()
+    };
+    const btn = document.getElementById('create-room');
+    btn.disabled = true; btn.textContent = 'Creating room…';
+    let code;
+    try{
+      code = await roomCreate(room);
+    }catch(e){
+      btn.disabled = false; btn.textContent = 'Create Room';
+      alert("Couldn't create a room — the room service (kvdb.io) may be unreachable right now. Check your connection and try again.");
+      return;
+    }
+    UI.roomCode = code; UI.mySeat = 0; UI.isHost = true;
+    UI.screen='waitingRoom'; render(); startWaitPolling();
+  };
+}
+
+function renderJoinRoom(){
+  root.innerHTML='';
+  root.appendChild(el(`
+    <div class="card">
+      <h3 style="margin-bottom:10px;">Join a Room</h3>
+      <label class="field-label">Room code</label>
+      <input type="text" id="code-input" maxlength="40" placeholder="Paste the code your friend sent" autocapitalize="off" autocomplete="off" spellcheck="false">
+      <div class="status-msg" id="join-err" style="margin-top:8px;color:#e0837f;">${UI.joinErr||''}</div>
+      <div class="opt-row" style="margin-top:16px;">
+        <button class="btn ghost" id="back">Back</button>
+        <button class="btn primary" id="do-join">Join</button>
+      </div>
+    </div>
+  `));
+  document.getElementById('back').onclick=()=>{UI.screen='onlineMenu'; render();};
+  const input = document.getElementById('code-input');
+  input.addEventListener('input', ()=>{ input.value = input.value.trim().replace(/\s+/g,''); });
+  document.getElementById('do-join').onclick=async ()=>{
+    const code = input.value.trim();
+    const btn = document.getElementById('do-join');
+    if(code.length<4){ UI.joinErr='Enter the room code your friend shared.'; render(); return; }
+    btn.disabled = true; btn.textContent = 'Joining…';
+    let room;
+    try{ room = await roomRead(code); }
+    catch(e){ UI.joinErr="Couldn't reach the room service — check your connection and try again."; render(); return; }
+    if(!room){ UI.joinErr='Room not found. Double-check the code (it\'s case-sensitive).'; render(); return; }
+    if(room.status!=='waiting'){ UI.joinErr='That game has already started.'; render(); return; }
+    const openIdx = room.seats.findIndex(s=>s.type==='empty');
+    if(openIdx===-1){ UI.joinErr='That room is full.'; render(); return; }
+    room.seats[openIdx] = {playerId:myId(), name:'Player', type:'human', connected:true};
+    room.updatedAt = Date.now();
+    try{ await roomWrite(code, room); }
+    catch(e){ UI.joinErr='Could not join — try again.'; render(); return; }
+    UI.roomCode = code; UI.mySeat = openIdx; UI.isHost=false;
+    UI.screen='waitingRoom'; render(); startWaitPolling();
+  };
+}
+
+function renderWaitingRoom(){
+  root.innerHTML='';
+  root.appendChild(el(`
+    <div class="card">
+      <h3 style="margin-bottom:6px;">${UI.isHost?'Your Room':'Waiting Room'}</h3>
+      <p class="sub" style="color:var(--muted);font-size:13.5px;">${UI.isHost?'Share this code with your friends:':'Waiting for the host to start the game…'}</p>
+      <div class="code-display" id="code-text" style="font-size:${UI.roomCode.length>14?'18px':'26px'};word-break:break-all;">${UI.roomCode}</div>
+      <button class="btn small" id="copy-code" style="width:100%;margin-top:-6px;">Copy Code</button>
+      <label class="field-label" style="margin-top:18px;">Seats</label>
+      <div id="wait-seats"></div>
+      <div class="opt-row" style="margin-top:16px;">
+        <button class="btn ghost" id="leave">Leave</button>
+        ${UI.isHost?`<button class="btn primary" id="fill-bots">Fill Empty w/ Bots</button>`:''}
+        ${UI.isHost?`<button class="btn primary" id="start-room" disabled>Start Game</button>`:''}
+      </div>
+      <div class="status-msg" id="wait-status" style="margin-top:10px;"></div>
+    </div>
+  `));
+  document.getElementById('leave').onclick=()=>{ stopWaitPolling(); UI.screen='onlineMenu'; render(); };
+  document.getElementById('copy-code').onclick=async ()=>{
+    const btn = document.getElementById('copy-code');
+    try{ await navigator.clipboard.writeText(UI.roomCode); btn.textContent='Copied!'; }
+    catch(e){ btn.textContent='Select the code above to copy'; }
+    setTimeout(()=>{ if(document.body.contains(btn)) btn.textContent='Copy Code'; }, 1800);
+  };
+  if(UI.isHost){
+    document.getElementById('fill-bots').onclick=async ()=>{
+      let room;
+      try{ room = await roomRead(UI.roomCode); }catch(e){ return; }
+      if(!room) return;
+      room.seats.forEach((s,i)=>{
+        if(s.type==='empty') room.seats[i] = {playerId:null, name:COLOR_NAMES[ARM_SETS[room.numPlayers][i]]+' Bot', type:'bot', difficulty:'medium', connected:true};
+      });
+      room.updatedAt = Date.now();
+      try{ await roomWrite(UI.roomCode, room); }catch(e){ return; }
+      refreshWaitingRoom();
+    };
+    document.getElementById('start-room').onclick=async ()=>{
+      let room;
+      try{ room = await roomRead(UI.roomCode); }catch(e){ return; }
+      if(!room) return;
+      room.status='active';
+      room.board = boardToObj(newBoardFromSeats(room.numPlayers, ARM_SETS[room.numPlayers]));
+      room.turn=0; room.winner=null; room.moveSeq=1; room.updatedAt=Date.now();
+      try{ await roomWrite(UI.roomCode, room); }catch(e){ return; }
+      enterOnlineGame(room);
+    };
+  }
+  refreshWaitingRoom();
+}
+
+function boardToObj(board){ const o={}; for(const [k,v] of board) o[k]=v; return o; }
+function objToBoard(o){ const m=new Map(); for(const k in o) m.set(k,o[k]); return m; }
+
+async function refreshWaitingRoom(){
+  if(UI.screen!=='waitingRoom') return;
+  let room;
+  try{ room = await roomRead(UI.roomCode); }
+  catch(e){ const st=document.getElementById('wait-status'); if(st) st.textContent="Couldn't reach the room service — retrying…"; return; }
+  if(!room){ const st=document.getElementById('wait-status'); if(st) st.textContent='Room no longer exists.'; return; }
+  if(room.status==='active'){ enterOnlineGame(room); return; }
+  const list = document.getElementById('wait-seats');
+  if(list){
+    list.innerHTML = room.seats.map((s,i)=>{
+      const arm = ARM_SETS[room.numPlayers][i];
+      const label = s.type==='empty' ? 'Open — waiting…' : (s.type==='bot' ? (s.name+' ('+(s.difficulty||'medium')+')') : (i===UI.mySeat?'You':'Friend joined'));
+      return `<div class="seat-row"><div class="swatch" style="background:${COLORS[arm]}"></div><div class="seat-name">${COLOR_NAMES[arm]}</div><div class="seat-sub">${label}</div></div>`;
+    }).join('');
+  }
+  const startBtn = document.getElementById('start-room');
+  if(startBtn){
+    const allFilled = room.seats.every(s=>s.type!=='empty');
+    startBtn.disabled = !allFilled;
+  }
+}
+
+let waitPollTimer=null;
+function startWaitPolling(){
+  stopWaitPolling();
+  waitPollTimer = setInterval(refreshWaitingRoom, 1600);
+}
+function stopWaitPolling(){ if(waitPollTimer){ clearInterval(waitPollTimer); waitPollTimer=null; } }
+
+function enterOnlineGame(room){
+  stopWaitPolling();
+  const seatsConfig = room.seats.map(s=>({type:s.type, difficulty:s.difficulty, name:s.name}));
+  const {proj, viewBox} = computeProjection(ARM_SETS[room.numPlayers][UI.mySeat]);
+  G = {
+    mode:'online', numPlayers:room.numPlayers,
+    seats: makeSeats(room.numPlayers, UI.mySeat, seatsConfig),
+    armList: ARM_SETS[room.numPlayers],
+    board: objToBoard(room.board),
+    turn: room.turn, selected:null, chainActive:false,
+    winner: room.winner, mySeat: UI.mySeat, roomCode: UI.roomCode, isHost: UI.isHost,
+    proj, viewBox, moveSeq: room.moveSeq, statusMsg:''
+  };
+  UI.screen='game';
+  render();
+  startPolling();
+  maybeTriggerBot();
+}
+
+function startPolling(){
+  stopPolling();
+  pollTimer = setInterval(pollRoom, 1500);
+}
+function stopPolling(){ if(pollTimer){ clearInterval(pollTimer); pollTimer=null; } }
+
+async function pollRoom(){
+  if(!G || G.mode!=='online' || !G.roomCode) return;
+  let room;
+  try{ room = await roomRead(G.roomCode); }catch(e){ return; }
+  if(!room) return;
+  if(room.moveSeq !== G.moveSeq){
+    G.board = objToBoard(room.board);
+    G.turn = room.turn;
+    G.winner = room.winner;
+    G.moveSeq = room.moveSeq;
+    G.selected = null; G.chainActive=false;
+    render();
+    maybeTriggerBot();
+  }
+}
+
+async function writeRoomState(){
+  if(G.mode!=='online') return;
+  G.moveSeq += 1;
+  const payload = {
+    code:G.roomCode, numPlayers:G.numPlayers,
+    seats: G.seats.map((s,i)=>({playerId: s.type==='human'?(i===G.mySeat?myId():'remote'):null, name:s.name, type:s.type, difficulty:s.difficulty, connected:true})),
+    status: G.winner!==null?'finished':'active',
+    board: boardToObj(G.board), turn:G.turn, winner:G.winner,
+    moveSeq:G.moveSeq, hostId: G.isHost?myId():undefined, updatedAt:Date.now()
+  };
+  try{ await roomWrite(G.roomCode, payload); }
+  catch(e){ G.statusMsg = "Move made, but couldn't sync to the room service — check your connection."; render(); }
+}
+
+/* ======================= GAME RENDER ======================= */
+function renderGame(){
+  root.innerHTML='';
+  const seat = G.seats[G.turn];
+  const isMyTurn = (G.mode==='bot' && G.turn===0) || (G.mode==='local') || (G.mode==='online' && G.turn===G.mySeat);
+  const canClick = isMyTurn && G.winner===null && seat.type!=='bot';
+
+  const holes = BOARD.cells.map(c=>{
+    const k = key(c); const [x,y] = G.proj.get(k);
+    const isLegal = canClick && G.legalMap && G.legalMap.has(k);
+    return `<circle class="hole ${isLegal?'legal':''}" data-key="${k}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="0.5"></circle>`;
+  }).join('');
+
+  let pegs='';
+  for(const [k, s] of G.board){
+    const [x,y] = G.proj.get(k);
+    const isSel = G.selected===k;
+    const mine = canClick && s===G.turn;
+    pegs += `<circle class="peg ${isSel?'selected':''} ${mine?'mine':'notmine'}" data-key="${k}" data-seat="${s}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="0.76" fill="${G.seats[s].color}"></circle>`;
+  }
+
+  const seatChips = G.seats.map((s,i)=>`
+    <div class="seat-chip ${i===G.turn?'turn':''}"><div class="swatch" style="background:${s.color}"></div>${s.name}${s.type==='bot'?' ('+s.difficulty+')':''}</div>
+  `).join('');
+
+  root.appendChild(el(`
+    <div class="gamewrap">
+      <div class="topbar">
+        <div class="turn-pill"><div class="swatch" style="background:${seat.color}"></div>
+          ${G.winner!==null ? 'Game over' : (isMyTurn ? "Your move" : seat.name+"'s move")}
+        </div>
+        <div class="controls">
+          ${G.mode==='online' ? `<span class="helpnote" style="padding:6px 10px;">Room ${G.roomCode}</span>`:''}
+          <button class="btn ghost small" id="leave-game">Leave</button>
+          ${G.chainActive ? `<button class="btn primary small" id="end-turn">End Turn</button>` : ''}
+        </div>
+      </div>
+      <div class="boardbox">
+        <svg viewBox="${G.viewBox.join(' ')}">
+          <g>${holes}</g>
+          <g>${pegs}</g>
+        </svg>
+      </div>
+      <div class="sidepanel">
+        <div class="seatlist">${seatChips}</div>
+      </div>
+      <div class="status-msg">${G.statusMsg||''}</div>
+    </div>
+  `));
+
+  const svg = root.querySelector('svg');
+  svg.addEventListener('click', onBoardClick);
+  document.getElementById('leave-game').onclick=()=>{
+    stopPolling(); G=null; UI.screen='menu'; render();
+  };
+  const endBtn = document.getElementById('end-turn');
+  if(endBtn) endBtn.onclick=()=>{ finishTurn(); };
+
+  if(G.winner!==null) showWinOverlay();
+}
+
+function onBoardClick(e){
+  const t = e.target.closest('[data-key]');
+  if(!t) return;
+  const k = t.dataset.key;
+  handleCellClick(k);
+}
+
+function handleCellClick(k){
+  const seat = G.seats[G.turn];
+  const isMyTurn = (G.mode==='bot' && G.turn===0) || (G.mode==='local') || (G.mode==='online' && G.turn===G.mySeat);
+  if(!isMyTurn || G.winner!==null || seat.type==='bot') return;
+
+  if(!G.selected){
+    const occ = G.board.get(k);
+    if(occ===G.turn){
+      G.selected = k;
+      const cell = fromKey(k);
+      const targets = new Map();
+      for(const to of stepTargets(G.board, cell)) targets.set(key(to), 'step');
+      for(const to of oneHopJumpTargets(G.board, cell)) targets.set(key(to), 'jump');
+      G.legalMap = targets;
+      render();
+    }
+    return;
+  }
+  // already have a selection
+  if(G.legalMap && G.legalMap.has(k)){
+    const moveType = G.legalMap.get(k);
+    doMove(fromKey(G.selected), fromKey(k), moveType);
+    return;
+  }
+  // clicking own other peg (only if not mid-chain) re-selects
+  if(!G.chainActive){
+    const occ = G.board.get(k);
+    if(occ===G.turn){
+      G.selected = k;
+      const cell = fromKey(k);
+      const targets = new Map();
+      for(const to of stepTargets(G.board, cell)) targets.set(key(to), 'step');
+      for(const to of oneHopJumpTargets(G.board, cell)) targets.set(key(to), 'jump');
+      G.legalMap = targets;
+      render();
+      return;
+    }
+  }
+  // otherwise ignore (mid-chain must continue or end turn)
+}
+
+function doMove(from, to, type){
+  const seatIdx = G.board.get(key(from));
+  G.board.delete(key(from));
+  G.board.set(key(to), seatIdx);
+  checkWinAfterMove(seatIdx);
+  if(G.winner!==null){ finalizeTurnUI(); return; }
+  if(type==='step'){
+    finishTurn();
+    return;
+  }
+  // jump: check for further one-hop jumps from new position
+  const further = oneHopJumpTargets(G.board, to);
+  if(further.length===0){
+    finishTurn();
+  } else {
+    G.selected = key(to);
+    G.chainActive = true;
+    const targets = new Map();
+    for(const t of further) targets.set(key(t), 'jump');
+    G.legalMap = targets;
+    render();
+  }
+}
+
+function checkWinAfterMove(seatIdx){
+  const seat = G.seats[seatIdx];
+  const goalSet = seatGoalSet(seat);
+  if(hasWon(G.board, seatIdx, goalSet)){
+    G.winner = seatIdx;
+  }
+}
+
+function finishTurn(){
+  G.selected = null; G.chainActive = false; G.legalMap = null;
+  if(G.winner===null){
+    G.turn = (G.turn+1) % G.numPlayers;
+  }
+  finalizeTurnUI();
+}
+
+function finalizeTurnUI(){
+  render();
+  if(G.mode==='online'){
+    writeRoomState();
+  }
+  maybeTriggerBot();
+}
+
+/* ======================= BOT AI ======================= */
+function pickBotMove(board, seat, difficulty){
+  const pegs = seatPegs(board, seat.seat);
+  let moves = allMovesForSeat(board, pegs);
+  if(moves.length===0) return null;
+  const scored = moves.map(m=>({m, d: forward(m.to, seat.arm)-forward(m.from, seat.arm)}));
+
+  if(difficulty==='easy'){
+    if(Math.random()<0.72){
+      return scored[Math.floor(Math.random()*scored.length)].m;
+    }
+    scored.sort((a,b)=>b.d-a.d);
+    return scored[0].m;
+  }
+
+  if(difficulty==='medium'){
+    scored.sort((a,b)=>b.d-a.d);
+    if(Math.random()<0.15 && scored.length>1) return scored[1].m;
+    const topD = scored[0].d;
+    const top = scored.filter(s=>s.d===topD);
+    return top[Math.floor(Math.random()*top.length)].m;
+  }
+
+  // hard: lookahead
+  scored.sort((a,b)=>b.d-a.d);
+  const candidates = scored.slice(0, Math.min(12, scored.length));
+  let best=null, bestScore=-Infinity;
+  for(const c of candidates){
+    const simBoard = new Map(board);
+    simBoard.delete(key(c.m.from));
+    simBoard.set(key(c.m.to), seat.seat);
+    const nextPegs = seatPegs(simBoard, seat.seat);
+    const nextMoves = allMovesForSeat(simBoard, nextPegs);
+    let bestFollow = 0;
+    for(const nm of nextMoves){
+      const dd = forward(nm.to, seat.arm)-forward(nm.from, seat.arm);
+      if(dd>bestFollow) bestFollow=dd;
+    }
+    const score = c.d + 0.35*bestFollow + Math.random()*0.05;
+    if(score>bestScore){ bestScore=score; best=c.m; }
+  }
+  return best;
+}
+
+function maybeTriggerBot(){
+  if(!G || G.winner!==null || processingBot) return;
+  const seat = G.seats[G.turn];
+  if(seat.type!=='bot') return;
+  if(G.mode==='online' && !G.isHost) return; // only host drives bots
+  processingBot = true;
+  setTimeout(()=>{ runBotTurn(); }, 650+Math.random()*500);
+}
+
+function runBotTurn(){
+  if(!G || G.winner!==null){ processingBot=false; return; }
+  const seat = G.seats[G.turn];
+  const move = pickBotMove(G.board, seat, seat.difficulty||'medium');
+  if(!move){
+    // no legal move - pass
+    processingBot=false;
+    finishTurn();
+    return;
+  }
+  animateBotMove(move, seat.seat, ()=>{
+    processingBot=false;
+    finishTurn();
+  });
+}
+
+function animateBotMove(move, seatIdx, done){
+  // move.path is array of cube coords for each hop landing (steps have length 1, jumps may have multiple)
+  let i=0;
+  let from = move.from;
+  function step(){
+    if(i>=move.path.length){ done(); return; }
+    const to = move.path[i];
+    G.board.delete(key(from));
+    G.board.set(key(to), seatIdx);
+    checkWinAfterMove(seatIdx);
+    render();
+    from = to; i++;
+    if(G.winner!==null){ done(); return; }
+    setTimeout(step, 280);
+  }
+  step();
+}
+
+/* ======================= WIN OVERLAY ======================= */
+function showWinOverlay(){
+  if(document.getElementById('win-overlay')) return;
+  const seat = G.seats[G.winner];
+  const isMe = (G.mode==='bot'&&G.winner===0)||(G.mode==='online'&&G.winner===G.mySeat)||(G.mode==='local');
+  const ov = el(`
+    <div class="overlay" id="win-overlay">
+      <div class="win-card">
+        <div class="swatch" style="background:${seat.color};border-radius:50%;"></div>
+        <h2>${seat.name} wins!</h2>
+        <p>${isMe && G.mode!=='local' ? 'Well played.' : 'Filled their home star first.'}</p>
+        <button class="btn primary" id="back-menu">Back to Menu</button>
+      </div>
+    </div>
+  `);
+  document.body.appendChild(ov);
+  document.getElementById('back-menu').onclick=()=>{
+    ov.remove(); stopPolling(); stopWaitPolling(); G=null; UI.screen='menu'; render();
+  };
+}
+
+/* ======================= INIT ======================= */
+render();
+</script>
+</body>
+</html>
