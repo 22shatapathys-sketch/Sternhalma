@@ -494,7 +494,7 @@ function renderOnlineMenu(){
    browsers talking to it directly — that's its whole purpose, so CORS is a given, not
    a gamble. This does require a one-time free Firebase project from you (see the
    setup steps in chat) — paste your project's databaseURL below.               */
-const FIREBASE_DB_URL = 'https://sternhalma-b678e-default-rtdb.firebaseio.com'; // <-- EDIT THIS LINE, see setup steps
+const FIREBASE_DB_URL = 'https://YOUR-PROJECT-ID-default-rtdb.firebaseio.com'; // <-- EDIT THIS LINE, see setup steps
 
 function genCode(){
   const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -588,7 +588,7 @@ function renderCreateSetup(){
     }
     const room = {
       numPlayers:n2, seats, status:'waiting',
-      board:null, turn:0, winner:null, moveSeq:0, hostId:myId(), updatedAt:Date.now()
+      board:null, turn:0, winner:-1, moveSeq:0, hostId:myId(), updatedAt:Date.now()
     };
     const btn = document.getElementById('create-room');
     btn.disabled = true; btn.textContent = 'Creating room…';
@@ -695,7 +695,7 @@ function renderWaitingRoom(){
       if(!room) return;
       room.status='active';
       room.board = boardToObj(newBoardFromSeats(room.numPlayers, ARM_SETS[room.numPlayers]));
-      room.turn=0; room.winner=null; room.moveSeq=1; room.updatedAt=Date.now();
+      room.turn=0; room.winner=-1; room.moveSeq=1; room.updatedAt=Date.now();
       try{ await roomWrite(UI.roomCode, room); }catch(e){ return; }
       enterOnlineGame(room);
     };
@@ -745,7 +745,7 @@ function enterOnlineGame(room){
     armList: ARM_SETS[room.numPlayers],
     board: objToBoard(room.board),
     turn: room.turn, selected:null, chainActive:false,
-    winner: room.winner, mySeat: UI.mySeat, roomCode: UI.roomCode, isHost: UI.isHost,
+    winner: (room.winner===undefined || room.winner===-1) ? null : room.winner, mySeat: UI.mySeat, roomCode: UI.roomCode, isHost: UI.isHost,
     proj, viewBox, moveSeq: room.moveSeq, statusMsg:''
   };
   UI.screen='game';
@@ -768,7 +768,7 @@ async function pollRoom(){
   if(room.moveSeq !== G.moveSeq){
     G.board = objToBoard(room.board);
     G.turn = room.turn;
-    G.winner = room.winner;
+    G.winner = (room.winner===undefined || room.winner===-1) ? null : room.winner;
     G.moveSeq = room.moveSeq;
     G.selected = null; G.chainActive=false;
     render();
@@ -783,7 +783,7 @@ async function writeRoomState(){
     code:G.roomCode, numPlayers:G.numPlayers,
     seats: G.seats.map((s,i)=>({playerId: s.type==='human'?(i===G.mySeat?myId():'remote'):null, name:s.name, type:s.type, difficulty:s.difficulty, connected:true})),
     status: G.winner!==null?'finished':'active',
-    board: boardToObj(G.board), turn:G.turn, winner:G.winner,
+    board: boardToObj(G.board), turn:G.turn, winner: G.winner===null ? -1 : G.winner,
     moveSeq:G.moveSeq, hostId: G.isHost?myId():undefined, updatedAt:Date.now()
   };
   try{ await roomWrite(G.roomCode, payload); }
